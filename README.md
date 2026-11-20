@@ -1,24 +1,24 @@
 <div align="center">
 
-# 💬 ➜ 📝 DialogSum LoRA Summarizer
+# DialogSum LoRA Summarizer
 
 **Teaching a small AI model to summarize conversations, using a laptop GPU.**
 
 ![Python](https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.6-EE4C2C?logo=pytorch&logoColor=white)
-![Hugging Face](https://img.shields.io/badge/🤗_Transformers_+_PEFT-yellow)
+![Hugging Face](https://img.shields.io/badge/Hugging_Face-Transformers_%2B_PEFT-FFD21E?logo=huggingface&logoColor=black)
 ![GPU](https://img.shields.io/badge/GPU-RTX_3060_(6_GB)-76B900?logo=nvidia&logoColor=white)
 
 <img src="assets/demo.gif" alt="Demo: a chat goes into the fine-tuned model and a one-line summary comes out, shown next to the human-written summary" width="820">
 
 <sub>Two real conversations from the test set, summarized by the fine-tuned model (LoRA r=4).
-Not every output is this good. See <a href="#-where-the-model-still-makes-mistakes">where the model still makes mistakes</a>.</sub>
+Not every output is this good. See <a href="#where-the-model-still-makes-mistakes">where the model still makes mistakes</a>.</sub>
 
 </div>
 
 ---
 
-## ⚡ The short version
+## The short version
 
 | | |
 |---|---|
@@ -31,7 +31,7 @@ Not every output is this good. See <a href="#-where-the-model-still-makes-mistak
 
 ---
 
-## 🤔 What is this project, in plain words?
+## What is this project, in plain words?
 
 Imagine a long chat like this:
 
@@ -42,7 +42,7 @@ Imagine a long chat like this:
 
 We want the computer to read it and write:
 
-> 📝 *#Person2# wants to buy a new mobile phone with camera and MP3 player.*
+> *#Person2# wants to buy a new mobile phone with camera and MP3 player.*
 
 Out of the box, FLAN-T5-small is **bad** at this. It often just copies one line of the chat. So we **fine-tune** it (give it extra practice on 1,999 example chats with human summaries).
 
@@ -50,23 +50,23 @@ Normal fine-tuning changes all 77 million weights, which is slow and needs a lot
 
 ---
 
-## 🗺️ How it works, step by step
+## How it works, step by step
 
 ```mermaid
 flowchart LR
-    A[📚 Load DialogSum<br/>chats + human summaries] --> B[✂️ Turn text into tokens<br/>input ≤ 512, summary ≤ 128]
-    B --> C[🧪 Test the base model<br/>baseline score]
-    C --> D[🧩 Attach LoRA adapters<br/>to attention layers q and v]
-    D --> E[🏋️ Train 2 epochs<br/>only LoRA weights change]
-    E --> F[💾 Save the small adapter]
-    F --> G[📝 Summarize 499 test chats]
-    G --> H[📊 Score with ROUGE<br/>+ error analysis]
-    H --> I[🔁 Repeat with rank r=16<br/>and compare]
+    A[Load DialogSum<br/>chats + human summaries] --> B[Turn text into tokens<br/>input ≤ 512, summary ≤ 128]
+    B --> C[Test the base model<br/>baseline score]
+    C --> D[Attach LoRA adapters<br/>to attention layers q and v]
+    D --> E[Train 2 epochs<br/>only LoRA weights change]
+    E --> F[Save the small adapter]
+    F --> G[Summarize 499 test chats]
+    G --> H[Score with ROUGE<br/>+ error analysis]
+    H --> I[Repeat with rank r=16<br/>and compare]
 ```
 
 ---
 
-## 🧩 What is LoRA? (the 30-second version)
+## What is LoRA? (the 30-second version)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/lora_diagram_dark.png">
@@ -88,7 +88,7 @@ With `r=4`, we train only **172,032** weights. That is **0.22%** of the model. T
 
 ---
 
-## 📊 Results
+## Results
 
 ### How do we score a summary?
 
@@ -113,16 +113,16 @@ All scores go from **0** (nothing in common) to **1** (identical). Higher is bet
   <img src="assets/rouge_comparison_light.png" alt="Grouped bar chart of ROUGE-1, ROUGE-2 and ROUGE-L for the base model, LoRA r=4 and LoRA r=16. r=16 is highest on all three." width="760">
 </picture>
 
-| Metric | Base model | LoRA `r=4` | LoRA `r=16` 🏆 | Gain (base → r=16) |
+| Metric | Base model | LoRA `r=4` | LoRA `r=16` | Gain (base → r=16) |
 |---|---:|---:|---:|---:|
 | ROUGE-1 | 0.0784 | 0.2625 | **0.3131** | **4.0x** |
 | ROUGE-2 | 0.0146 | 0.0788 | **0.1027** | **7.0x** |
 | ROUGE-L | 0.0689 | 0.2238 | **0.2599** | **3.8x** |
 
 **What this means:**
-- ✅ Fine-tuning helped a lot. Every score went up 3-7x.
-- ✅ The bigger adapter (`r=16`) beat the smaller one (`r=4`) on every score.
-- ⚠️ The `r=16` run also trained for twice as many steps (1,000 vs 500, see *Training settings* below). So part of its win may come from extra training, not only from the higher rank.
+- Fine-tuning helped a lot. Every score went up 3-7x.
+- The bigger adapter (`r=16`) beat the smaller one (`r=4`) on every score.
+- **Caveat:** The `r=16` run also trained for twice as many steps (1,000 vs 500, see *Training settings* below). So part of its win may come from extra training, not only from the higher rank.
 
 ### One example, before and after
 
@@ -130,15 +130,15 @@ Same test chat (a boss dictating a memo that bans instant messaging at work):
 
 | Model | Its summary |
 |---|---|
-| 👤 **Human** | *Ms. Dawson helps #Person1# to write a memo to inform every employee that they have to change the communication method and should not use Instant Messaging anymore.* |
-| 🔴 **Base model** | *#Person2#: Thank you for your help.* ← just copies a chat line |
-| 🟢 **LoRA r=16** | *#Person2# asks #Person1# to take a dictation for Ms. Dawson. #Person1# asks #Person2# to take a dictation for Ms. Dawson.* |
+| **Human** | *Ms. Dawson helps #Person1# to write a memo to inform every employee that they have to change the communication method and should not use Instant Messaging anymore.* |
+| **Base model** | *#Person2#: Thank you for your help.* ← just copies a chat line |
+| **LoRA r=16** | *#Person2# asks #Person1# to take a dictation for Ms. Dawson. #Person1# asks #Person2# to take a dictation for Ms. Dawson.* |
 
 The fine-tuned model now writes a summary about the right topic (a dictation). But it **mixes up who is who** and **repeats itself**. These are the two most common mistakes. More on that below.
 
 ---
 
-## 🏋️ Training: watching the model learn
+## Training: watching the model learn
 
 <div align="center">
 <img src="assets/training_loss.gif" alt="Animated line chart: training loss for r=4 falls from 20.6 to 13.1 over 500 steps; r=16 falls from 10.3 to 5.9 over 1000 steps" width="640">
@@ -147,7 +147,7 @@ The fine-tuned model now writes a summary about the right topic (a dictation). B
 **Loss** is how "wrong" the model is on the training data. Lower is better. Both runs drop fast in the first ~150 steps, then level off.
 
 <details>
-<summary><b>💥 The first attempt crashed. Here is what went wrong and how it was fixed (click to open)</b></summary>
+<summary><b>The first attempt crashed. Here is what went wrong and how it was fixed (click to open)</b></summary>
 <br>
 
 The first training run used **half precision (FP16)** and a learning rate of `2e-4`. The loss **exploded into the millions**, so the model learned nothing.
@@ -167,7 +167,7 @@ After that, training was stable.
 
 ---
 
-## 🔍 Where the model still makes mistakes
+## Where the model still makes mistakes
 
 A good average score does not mean every summary is good. The [`fine_tuned_error_analysis.csv`](fine_tuned_error_analysis.csv) file holds all 499 test predictions from the `r=4` model, and we checked them for obvious problems.
 
@@ -198,17 +198,17 @@ On average the lengths match well (model: **21 words**, human: **19 words**). Bu
 
 | Mistake | Example of what goes wrong |
 |---|---|
-| 🔀 **Mixing up speakers** | Says #Person1# did something that #Person2# did. |
-| 🔁 **Repeating itself** | The same sentence 2-3 times in one summary. |
-| 🎯 **Missing the main point** | Summarizes a small detail instead of what the chat was about. |
-| ✏️ **Odd grammar** | Sentences that sound a bit unnatural. |
-| 📋 **Too literal** | Copies one line from the chat instead of summarizing. |
+| **Mixing up speakers** | Says #Person1# did something that #Person2# did. |
+| **Repeating itself** | The same sentence 2-3 times in one summary. |
+| **Missing the main point** | Summarizes a small detail instead of what the chat was about. |
+| **Odd grammar** | Sentences that sound a bit unnatural. |
+| **Too literal** | Copies one line from the chat instead of summarizing. |
 
-> 💡 **Why are there so many repeated summaries?** Only 166 of the 499 predictions are unique. That sounds bad, but the test set contains each of its **167 conversations about 3 times** (each with a different human summary). The model gives the same summary for the same chat, which is expected. We also checked that **no test chat appears in the training data**.
+> **Why are there so many repeated summaries?** Only 166 of the 499 predictions are unique. That sounds bad, but the test set contains each of its **167 conversations about 3 times** (each with a different human summary). The model gives the same summary for the same chat, which is expected. We also checked that **no test chat appears in the training data**.
 
 ---
 
-## ⚙️ Training settings
+## Training settings
 
 | Setting | LoRA `r=4` | LoRA `r=16` |
 |---|---|---|
@@ -233,7 +233,7 @@ On average the lengths match well (model: **21 words**, human: **19 words**). Bu
 
 ---
 
-## 🚀 Run it yourself
+## Run it yourself
 
 **1. Install the libraries**
 
@@ -254,9 +254,9 @@ jupyter notebook dialogsum_lora_finetuning.ipynb
 **3. Run the cells from top to bottom.** The dataset and model download automatically from Hugging Face.
 
 **What you need:**
-- 🖥️ An NVIDIA GPU with about **6 GB** of memory (CPU works too, but is much slower)
-- 🧠 At least **16 GB** of RAM
-- 🐍 Python **3.10** or newer
+- An NVIDIA GPU with about **6 GB** of memory (CPU works too, but is much slower)
+- At least **16 GB** of RAM
+- Python **3.10** or newer
 
 **Rebuild the charts and GIFs in this README:**
 
@@ -266,7 +266,7 @@ python scripts/make_figures.py
 
 ---
 
-## 📁 What's in this repo
+## What's in this repo
 
 ```text
 .
@@ -282,21 +282,21 @@ python scripts/make_figures.py
 
 ---
 
-## 🔮 What could make it better
+## What could make it better
 
 | Idea | Why it might help |
 |---|---|
-| 🔎 Use **beam search** instead of greedy decoding | Looks at several possible summaries and picks the best one |
-| 🚫 Add `no_repeat_ngram_size` / repetition penalty | Directly stops the "repeating itself" problem |
-| ⏱️ Train longer, with a validation set and early stopping | Find the best checkpoint instead of just the last one |
-| ⚖️ Compare `r=4` and `r=16` with the **same number of steps** | Find out how much of the gain is really from the rank |
-| 📏 Score with the official Hugging Face `evaluate` ROUGE | Makes the numbers comparable with published papers |
-| 🧪 Try more ranks and more layers (`k`, `o`, feed-forward) | See where the adapter helps most |
-| 📈 Try a bigger model (`flan-t5-base`) | More capacity, if there is enough GPU memory |
+| Use **beam search** instead of greedy decoding | Looks at several possible summaries and picks the best one |
+| Add `no_repeat_ngram_size` / repetition penalty | Directly stops the "repeating itself" problem |
+| Train longer, with a validation set and early stopping | Find the best checkpoint instead of just the last one |
+| Compare `r=4` and `r=16` with the **same number of steps** | Find out how much of the gain is really from the rank |
+| Score with the official Hugging Face `evaluate` ROUGE | Makes the numbers comparable with published papers |
+| Try more ranks and more layers (`k`, `o`, feed-forward) | See where the adapter helps most |
+| Try a bigger model (`flan-t5-base`) | More capacity, if there is enough GPU memory |
 
 ---
 
-## 🛠️ Built with
+## Built with
 
 Python · PyTorch · Hugging Face Transformers · Hugging Face Datasets · Hugging Face PEFT · CUDA · NumPy · pandas · Jupyter · Matplotlib
 
