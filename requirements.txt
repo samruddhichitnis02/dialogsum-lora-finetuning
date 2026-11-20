@@ -1,0 +1,24 @@
+# Versions used for the recorded notebook run (Python 3.10).
+#
+# PyTorch: for GPU support, install the CUDA build first, e.g.
+#   pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+# then install the rest with:
+#   pip install -r requirements.txt
+
+# Model training and evaluation
+torch==2.6.0
+transformers==5.17.0
+datasets==5.0.1
+peft==0.21.0
+accelerate==1.15.0
+
+# Data handling
+numpy==2.2.6
+pandas==2.3.3
+
+# Notebook
+jupyter==1.1.1
+
+# Charts and GIFs (scripts/make_figures.py)
+matplotlib==3.10.9
+pillow==12.3.0
